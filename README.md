@@ -2,6 +2,15 @@
 
 Basic Python template for creating a file translation spooler.
 
+## How to Install
+
+```bash
+python3 -m venv /opt/translator_template
+source /opt/translator_template/bin/activate
+pip install --upgrade pip setuptools wheel
+pip install translator_template
+```
+
 ## How to Run
 
 Process a single file
