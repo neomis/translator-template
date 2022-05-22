@@ -1,0 +1,14 @@
+[Unit]
+Description=Python Template Service
+After=syslog.target network.target
+
+[Service]
+User=<user>
+Group=<group>
+WorkingDirectory=/opt/translator_template
+ExecStart=/opt/translator_template/bin/translate_spool -d
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
