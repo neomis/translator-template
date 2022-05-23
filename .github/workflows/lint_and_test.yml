@@ -31,7 +31,7 @@ jobs:
           pip install .[dev]
       - name: Build Version
         run: |
-          translator_template --version
+          translate_file --version
       - name: Lint with mypy
         run: |
           mypy translator_template
