@@ -1,6 +1,6 @@
 variables:
   GIT_CLEAN_FLAGS: -ffdx -e venv
-
+image: python
 stages:
   - build
   - test
@@ -10,9 +10,10 @@ stages:
 build:
   stage: build
   tags:
-    - python
+    - docker,python
   script:
-    - if [[ ! -d venv ]]; then python3 -m venv venv; fi
+    - python -c "import sys; print(sys.version)"
+    - if [[ ! -d venv ]]; then python -m venv venv; fi
     - source venv/bin/activate
     - pip install -U pip setuptools wheel
     - pip install .[dev]
@@ -21,7 +22,7 @@ build:
 test:
   stage: test
   tags:
-    - python
+    - docker,python
   script:
     - source venv/bin/activate
     - mypy -p translator_template
@@ -33,26 +34,28 @@ test:
 deploy_to_pypy:
   stage: deploy
   tags:
-    - python
+    - docker,python
   script:
     - source venv/bin/activate
     - pip install twine
     - python setup.py check sdist bdist_wheel
     - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
+  artifacts:
+    paths:
+      - dist/
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
       when: on_success
-
-release_to_production:
-  stage: production
-  tags:
-    - python
-  script:
-    - source /opt/translator_template/bin/activate
-    - pip install -U pip setuptools wheel
-    - pip install translator_template==$CI_COMMIT_REF_NAME
-    - deactivate
-    - sudo systemctl restart translator-template.service
-  rules:
-    - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
-      when: on_success
+# release_to_production:
+#   stage: production
+#   tags:
+#     - server
+#   script:
+#     - source /opt/translator_template/bin/activate
+#     - pip install -U pip setuptools wheel
+#     - pip install translator_template==$CI_COMMIT_REF_NAME
+#     - deactivate
+#     - sudo systemctl restart translator-template.service
+#   rules:
+#     - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
+#       when: on_success
