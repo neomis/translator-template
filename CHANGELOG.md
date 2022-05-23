@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.1.1 (2022.05.22)
+
+### BUG FIX
+
+- Added version flag to click methods
+- Fixed typo in github flow
+
 ## 1.1.0 (2022.05.22)
 
 ### ENHANCEMENTS

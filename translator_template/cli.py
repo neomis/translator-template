@@ -12,6 +12,7 @@ logger.remove(0)
 @click.command()
 @click.argument('file_path', type=str)
 @click.option('--loglevel', 'log_level', type=click.Choice(['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'], case_sensitive=False), default='ERROR')
+@click.version_option()
 def translate_file(file_path, log_level) -> None:
     """Translate a single file"""
     from .main import spool_file  # pylint: disable=import-outside-toplevel
@@ -24,6 +25,7 @@ def translate_file(file_path, log_level) -> None:
 @click.command()
 @click.option('-d', '--daemon', 'daemon', is_flag=True, default=False, help="Run in daemon mode.")
 @click.option('--loglevel', 'log_level', type=click.Choice(['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'], case_sensitive=False), default='ERROR')
+@click.version_option()
 def translate_spool(daemon, log_level) -> None:
     """Main Comand Line Interface"""
     from .main import spooler, spool_daemon  # pylint: disable=import-outside-toplevel
