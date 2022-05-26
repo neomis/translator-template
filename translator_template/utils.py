@@ -20,6 +20,10 @@ def validate_path(dir_path: str, permission: str = 'r') -> bool:
     """Validate folder permissions."""
     if not os.path.exists(dir_path):
         try:
+            full_path = os.path.abspath(dir_path)
+            base_path = os.path.split(full_path)[0]
+            if base_path != full_path:
+                validate_path(base_path)
             os.mkdir(dir_path)
         except Exception as error:
             logger.error(f"Failed to create path: {dir_path}")
@@ -135,7 +139,7 @@ def write_json(data: Dict[str, Any], file_path: Optional[str], permission=0o664)
                       sort_keys=False, default=sanitize_json)
             file_handle.close()
     final_path = temp_path + file_ext
-    os.rename(temp_path, final_path)
+    os.replace(temp_path, final_path)
     os.chmod(final_path, permission)
     logger.info(f"FILE SAVED: {final_path}")
     return None
