@@ -4,6 +4,37 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
 trigger:
+  branches:
+    include:
+    - '*'
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.x"
+      architecture: "x64"
+    displayName: "Use Python $(python.version)"
+  - script: |
+      python -c "import sys; print(sys.version)"
+      python -m pip install --upgrade pip setuptools wheel
+      pip install .[dev]
+    displayName: "Install dependencies"
+  - script: |
+      mypy translator_template
+    displayName: "Lint with MyPy"
+  - script: |
+      pylint translator_template
+    displayName: "Lint with PyLint"
+  - script: |
+      pip install pytest-azurepipelines
+      pytest
+    displayName: "Test with PyTest"
+
+
+trigger:
   tags:
     include:
     - '*'
