@@ -11,8 +11,9 @@ trigger:
     include:
       - '*'
 
-pool:
-  vmImage: ubuntu-latest
+# pool:
+#   vmImage: ubuntu-latest
+pool: 'server pool'
 
 jobs:
 - job: test
