@@ -7,11 +7,16 @@ trigger:
   branches:
     include:
     - '*'
+  tags:
+    include:
+      - '*'
 
 pool:
   vmImage: ubuntu-latest
 
-steps:
+jobs:
+- job: test
+  steps:
   - task: UsePythonVersion@0
     inputs:
       versionSpec: "3.x"
@@ -32,31 +37,25 @@ steps:
       pip install pytest-azurepipelines
       pytest
     displayName: "Test with PyTest"
-
-
-trigger:
-  tags:
-    include:
-    - '*'
-
-pool:
-  vmImage: ubuntu-latest
-
-steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: "3.x"
-      architecture: "x64"
-    displayName: "Use Python $(python.version)"
-  - script: |
-      python -c "import sys; print(sys.version)"
-      python -m pip install --upgrade pip setuptools wheel
-      python setup.py sdist bdist_wheel
-    displayName: "Build Package"
-  - task: TwineAuthenticate@1
-    inputs:
-      artifactFeed: 'neomis'
-    displayName: "Authenticate Twine"
-  - script: |
-    python -m twine upload -r neomis --config-file $(PYPIRC_PATH) dist/*.whl
-    displayName: "Upload packages"
+- job: package
+  dependsOn:
+    - test
+  condition: and(succeeded('test'), eq(variables['build.sourceBranch'], 'refs/heads/main'), startsWith(variables['build.sourceBranch'], 'refs/tags/'))
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: "3.x"
+        architecture: "x64"
+      displayName: "Use Python $(python.version)"
+    - script: |
+        python -c "import sys; print(sys.version)"
+        python -m pip install --upgrade pip setuptools wheel
+        python setup.py sdist bdist_wheel
+      displayName: "Build Package"
+    - task: TwineAuthenticate@1
+      inputs:
+        artifactFeed: 'neomis'
+      displayName: "Authenticate Twine"
+    - script: |
+        python -m twine upload -r neomis --config-file $(PYPIRC_PATH) dist/*.whl
+      displayName: "Upload packages"
