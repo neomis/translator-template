@@ -17,8 +17,6 @@ pool: 'server pool'
 
 jobs:
 - job: test
-  pool:
-    vmImage: 'ubuntu-latest'
   steps:
   - task: UsePythonVersion@0
     inputs:
