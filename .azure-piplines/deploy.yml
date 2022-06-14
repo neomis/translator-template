@@ -18,15 +18,12 @@ steps:
   - script: |
       python -c "import sys; print(sys.version)"
       python -m pip install --upgrade pip setuptools wheel
-      pip install .[dev]
-    displayName: "Install dependencies"
+      python setup.py sdist bdist_wheel
+    displayName: "Build Package"
+  - task: TwineAuthenticate@1
+    inputs:
+      artifactFeed: 'neomis'
+    displayName: "Authenticate Twine"
   - script: |
-      mypy translator_template
-    displayName: "Lint with MyPy"
-  - script: |
-      pylint translator_template
-    displayName: "Lint with PyLint"
-  - script: |
-      pip install pytest-azurepipelines
-      pytest
-    displayName: "Test with PyTest"
+    python -m twine upload -r neomis --config-file $(PYPIRC_PATH) dist/*.whl
+    displayName: "Upload packages"
