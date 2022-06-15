@@ -9,7 +9,7 @@ trigger:
     - '*'
   tags:
     include:
-      - '*'
+      - 'v*'
 
 pool:
   vmImage: ubuntu-latest
@@ -17,6 +17,7 @@ pool:
 
 jobs:
 - job: test
+  condition: startsWith(variables['build.sourceBranch'], 'refs/heads/')
   steps:
   - task: UsePythonVersion@0
     inputs:
@@ -36,12 +37,20 @@ jobs:
     displayName: "Lint with PyLint"
   - script: |
       pip install pytest-azurepipelines
-      pytest
+      pytest 
     displayName: "Test with PyTest"
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+      testRunTitle: 'Publish test results for Python $(python.version)'
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+
 - job: package
-  dependsOn:
-    - test
-  condition: and(succeeded('test'), eq(variables['build.sourceBranch'], 'refs/heads/main'), startsWith(variables['build.sourceBranch'], 'refs/tags/'))
+  condition: startsWith(variables['build.sourceBranch'], 'refs/tags/')
   steps:
     - task: UsePythonVersion@0
       inputs:
