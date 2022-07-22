@@ -45,3 +45,15 @@ Run the spooler as a daemon
 # LOG_LEVEL = ERROR
 # SLEEP_TIME = 5
 ```
+## Import External Translators
+
+See Translator-Template-Example for how to create external translators.
+In short add the following line to setup.py in the external package:
+
+```python
+entry_points={
+        'translator_template.translators': '<alias> = <package_name>.translator:main'
+}
+```
+
+The modules will be imported automatically.

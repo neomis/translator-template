@@ -1,10 +1,10 @@
 # CHANGELOG
 
-## 1.2.0 (2022.05.27)
+## 1.2.0 (2022.07.21)
 
-### ENHANCEMENT
+### ENHANCEMENTS
 
-- Added Azure pipeline support
+- Added the ability to import external translators
 
 ## 1.1.2 (2022.05.26)
 
