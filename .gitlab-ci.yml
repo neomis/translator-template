@@ -1,4 +1,4 @@
-# image: python
+image: python
 
 stages:
   - static analysis
@@ -20,7 +20,7 @@ mypy:
 pylint:
   stage: static analysis
   tags:
-    - docker,python
+    - python
   before_script:
     - pip install anybadge pylint pylint-exit
     - mkdir ./pylint
@@ -38,7 +38,7 @@ pylint:
 test:
   stage: test
   tags:
-    - docker,python
+    - python
   before_script:
     - pip install pytest pytest-cov
   script:
@@ -57,7 +57,7 @@ test:
 deploy_to_pypy:
   stage: deploy
   tags:
-    - docker,python
+    - python
   before_script:
     - pip install twine
   script:
