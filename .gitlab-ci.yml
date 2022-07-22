@@ -40,6 +40,8 @@ test:
   tags:
     - python
   before_script:
+    - pip install -U pip setuptools wheel
+    - pip install .
     - pip install pytest pytest-cov
   script:
     - pytest
