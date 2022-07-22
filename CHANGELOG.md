@@ -6,6 +6,7 @@
 
 - Reconfigured gitlab runner configuration
 - Enabled deploy to production
+- Updated Azure Pipeline (I have no way to test if this works right now.)
 
 ## 1.2.0 (2022.07.21)
 
