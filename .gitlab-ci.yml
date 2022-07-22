@@ -53,6 +53,14 @@ test:
   script:
     - source venv/bin/activate
     - pytest
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    when: always
+    reports:
+      junit: junit/test-results.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
   except:
     - tags
 
@@ -71,7 +79,6 @@ deploy_to_pypy:
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
       when: on_success
-
 # release_to_production:
 #   stage: production
 #   tags:
