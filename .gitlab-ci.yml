@@ -16,7 +16,7 @@ build:
     - if [[ ! -d venv ]]; then python -m venv venv; fi
     - source venv/bin/activate
     - pip install -U pip setuptools wheel
-    - pip install .[dev]
+    - pip --extra-index-url https://__token__:{CI_JOB_TOKEN}@gitlab.neomis.games/api/v4/groups/home/-/packages/pypi/simple install .[dev]
   when: always
 
 mypy:
