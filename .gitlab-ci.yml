@@ -19,14 +19,39 @@ build:
     - pip install .[dev]
   when: always
 
-test:
+mypy:
   stage: test
   tags:
     - docker,python
   script:
     - source venv/bin/activate
     - mypy -p translator_template
-    - pylint translator_template
+  except:
+    - tags
+
+pylint:
+  stage: test
+  tags:
+    - docker,python
+  script:
+    - source venv/bin/activate
+    - mkdir ./pylint
+    - pylint translator_template | tee ./pylint/pylint.log || pylint-exit $?
+    - PYLINT_SCORE=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' ./pylint/pylint.log)
+    - anybadge --label=Pylint --file=pylint/pylint.svg --value=$PYLINT_SCORE 2=red 4=orange 8=yellow 10=green
+    - echo "Pylint score is $PYLINT_SCORE"
+  artifacts:
+    paths:
+      - ./pylint/
+  except:
+    - tags
+
+test:
+  stage: test
+  tags:
+    - docker,python
+  script:
+    - source venv/bin/activate
     - pytest
   except:
     - tags
@@ -46,6 +71,7 @@ deploy_to_pypy:
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
       when: on_success
+
 # release_to_production:
 #   stage: production
 #   tags:
@@ -55,7 +81,7 @@ deploy_to_pypy:
 #     - pip install -U pip setuptools wheel
 #     - pip install translator_template==$CI_COMMIT_REF_NAME
 #     - deactivate
-#     - sudo systemctl restart translator-template.service
+#     - sudo systemctl restart translator_template.service
 #   rules:
 #     - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
 #       when: on_success
