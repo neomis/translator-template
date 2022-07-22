@@ -71,16 +71,17 @@ deploy_to_pypy:
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
       when: on_success
-# release_to_production:
-#   stage: production
-#   tags:
-#     - server
-#   script:
-#     - source /opt/translator_template/bin/activate
-#     - pip install -U pip setuptools wheel
-#     - pip install translator_template==$CI_COMMIT_REF_NAME
-#     - deactivate
-#     - sudo systemctl restart translator_template.service
-#   rules:
-#     - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
-#       when: on_success
+
+release_to_production:
+  stage: production
+  tags:
+    - server
+  script:
+    - source /opt/translator_template/bin/activate
+    - pip install -U pip setuptools wheel
+    - pip install translator_template==$CI_COMMIT_REF_NAME
+    - deactivate
+    - sudo systemctl restart translator_template.service
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
+      when: on_success
