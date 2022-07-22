@@ -4,10 +4,12 @@ from time import sleep
 from multiprocessing import Pool
 import pidfile
 from loguru import logger
-from translator_template import translator
 from .utils import validate_file, validate_path, read_dir
 from .config import (ENVIRONMENT, QUEUE_PATH, WORK_PATH, REJECT_PATH,
                      THREADS, PID_FILE, LOG_FILE, LOG_LEVEL, SLEEP_TIME)
+from .translators import TRANSLATORS
+
+__all__ = ('spool_file', 'spooler', 'spool_daemon',)
 
 
 def spool_file(file_path: str, **kwargs) -> None:
@@ -31,11 +33,11 @@ def spool_file(file_path: str, **kwargs) -> None:
         file_ext = os.path.splitext(file_name)[1]
         if file_ext != '':
             file_ext = file_ext[1:]
-        method_name = f"TRANSLATE_{file_ext.upper()}"
-        logger.debug(f"METHOD_NAME: {method_name}")
-        if not hasattr(translator, method_name):
-            raise ValueError(f"No translator found for file: {file_name}")
-        getattr(translator, method_name)(file_path)
+        translator_name = f"TRANSLATE_{file_ext.upper()}"
+        logger.debug(f"METHOD_NAME: {translator_name}")
+        if translator_name not in TRANSLATORS:
+            raise ValueError(f"Translator not found: {translator_name}")
+        TRANSLATORS[translator_name](file_path)
         if ENVIRONMENT == "PRODUCTION":
             try:
                 os.unlink(file_path)

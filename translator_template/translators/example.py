@@ -7,6 +7,9 @@ import arrow
 import pandas as pd
 from translator_template.config import ENCODING, OUT_PATH
 from translator_template.utils import write_json, validate_path
+from translator_template.__version__ import __version__ as TRANSLATOR_VERSION
+
+__all__ = ('main',)
 
 
 def main(file_path: str) -> None:
@@ -16,7 +19,7 @@ def main(file_path: str) -> None:
     with open(file_path, 'r', encoding=ENCODING) as file_handle:
         lines: List[str] = file_handle.read().strip().split('\n')
         file_handle.close()
-    record: Dict[str, Any] = {}
+    record: Dict[str, Any] = {'TRANSLATOR_VERSION': TRANSLATOR_VERSION}
     line_num: int = 0
     while len(lines) > 0:
         line: str = lines.pop(0).strip()
