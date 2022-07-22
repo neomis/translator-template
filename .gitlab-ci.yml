@@ -1,41 +1,30 @@
-variables:
-  GIT_CLEAN_FLAGS: -ffdx -e venv
 image: python
+
 stages:
-  - build
+  - static analysis
   - test
   - deploy
   - production
 
-build:
-  stage: build
-  tags:
-    - docker,python
-  script:
-    - python -c "import sys; print(sys.version)"
-    - if [[ ! -d venv ]]; then python -m venv venv; fi
-    - source venv/bin/activate
-    - pip install -U pip setuptools wheel
-    - pip install .[dev]
-  when: always
-
 mypy:
-  stage: test
+  stage: static analysis
   tags:
-    - docker,python
+    - python
+  before_script:
+    - pip install mypy
   script:
-    - source venv/bin/activate
     - mypy -p translator_template
   except:
     - tags
 
 pylint:
-  stage: test
+  stage: static analysis
   tags:
-    - docker,python
-  script:
-    - source venv/bin/activate
+    - python
+  before_script:
+    - pip install anybadge pylint pylint-exit
     - mkdir ./pylint
+  script:
     - pylint translator_template | tee ./pylint/pylint.log || pylint-exit $?
     - PYLINT_SCORE=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' ./pylint/pylint.log)
     - anybadge --label=Pylint --file=pylint/pylint.svg --value=$PYLINT_SCORE 2=red 4=orange 8=yellow 10=green
@@ -49,9 +38,12 @@ pylint:
 test:
   stage: test
   tags:
-    - docker,python
+    - python
+  before_script:
+    - pip install -U pip setuptools wheel
+    - pip install .
+    - pip install pytest pytest-cov
   script:
-    - source venv/bin/activate
     - pytest
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
@@ -67,10 +59,10 @@ test:
 deploy_to_pypy:
   stage: deploy
   tags:
-    - docker,python
-  script:
-    - source venv/bin/activate
+    - python
+  before_script:
     - pip install twine
+  script:
     - python setup.py check sdist bdist_wheel
     - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
   artifacts:
@@ -79,16 +71,17 @@ deploy_to_pypy:
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
       when: on_success
-# release_to_production:
-#   stage: production
-#   tags:
-#     - server
-#   script:
-#     - source /opt/translator_template/bin/activate
-#     - pip install -U pip setuptools wheel
-#     - pip install translator_template==$CI_COMMIT_REF_NAME
-#     - deactivate
-#     - sudo systemctl restart translator_template.service
-#   rules:
-#     - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
-#       when: on_success
+
+release_to_production:
+  stage: production
+  tags:
+    - server
+  script:
+    - source /opt/translator_template/bin/activate
+    - pip install -U pip setuptools wheel
+    - pip install translator_template==$CI_COMMIT_REF_NAME
+    - deactivate
+    - sudo systemctl restart translator_template.service
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
+      when: on_success
