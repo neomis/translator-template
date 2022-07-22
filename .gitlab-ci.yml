@@ -1,27 +1,17 @@
 image: python
 
 stages:
-  - build
   - static analysis
   - test
   - deploy
   - production
 
-build:
-  stage: build
-  tags:
-    - docker,python
-  script:
-    # - if [[ ! -d venv ]]; then python -m venv venv; fi
-    # - source venv/bin/activate
-    - pip install -U pip setuptools wheel
-    - pip install .[dev]
-  when: always
-
 mypy:
   stage: static analysis
   tags:
     - docker,python
+  before_script:
+    - pip install mypy
   script:
     - mypy -p translator_template
   except:
@@ -32,7 +22,7 @@ pylint:
   tags:
     - docker,python
   before_script:
-    - pip install anybadge
+    - pip install anybadge pylint pylint-exit
     - mkdir ./pylint
   script:
     - pylint translator_template | tee ./pylint/pylint.log || pylint-exit $?
@@ -49,6 +39,8 @@ test:
   stage: test
   tags:
     - docker,python
+  before_script:
+    - pip install pytest pytest-cov
   script:
     - pytest
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
