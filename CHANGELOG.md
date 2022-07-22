@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.2.1 (2022.07.22)
+
+### ENHANCEMENTS
+
+- Reconfigured gitlab runner configuration
+- Enabled deploy to production
+
 ## 1.2.0 (2022.07.21)
 
 ### ENHANCEMENTS
