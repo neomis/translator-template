@@ -1,17 +1,31 @@
 image: python
 
 stages:
+  - build
   - static analysis
   - test
   - deploy
   - production
+
+build:
+  stage: build
+  tags:
+    - python
+  script:
+    - python -m venv venv
+    - source venv/bin/activate
+    - pip install -U pip setuptools wheel
+    - pip install .[dev]
+  artifacts:
+    paths:
+      - ./venv/
 
 mypy:
   stage: static analysis
   tags:
     - python
   before_script:
-    - pip install mypy
+    - source venv/bin/activate
   script:
     - mypy -p translator_template
   except:
@@ -22,6 +36,7 @@ pylint:
   tags:
     - python
   before_script:
+    - source venv/bin/activate
     - pip install anybadge pylint pylint-exit
     - mkdir ./pylint
   script:
@@ -40,9 +55,7 @@ test:
   tags:
     - python
   before_script:
-    - pip install -U pip setuptools wheel
-    - pip install .
-    - pip install pytest pytest-cov
+    - source venv/bin/activate
   script:
     - pytest
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
