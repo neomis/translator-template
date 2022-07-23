@@ -19,6 +19,8 @@ build:
   artifacts:
     paths:
       - ./venv/
+  except:
+    - tags
 
 mypy:
   stage: static analysis
