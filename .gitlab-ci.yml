@@ -81,7 +81,7 @@ release_to_production:
     - pip install -U pip setuptools wheel
     - pip install translator_template==$CI_COMMIT_REF_NAME
     - deactivate
-    - sudo systemctl restart translator_template.service
+    - sudo systemctl restart translator-template.service
   rules:
     - if: '$CI_COMMIT_REF_NAME =~ /^v*\d+\.\d+\.\d+([abc]\d*)?$/' # PEP-440 compliant version (tags)
       when: on_success
